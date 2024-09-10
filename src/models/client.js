@@ -31,4 +31,4 @@ const schema = new mongoose.Schema(
     { timestamps: true }
 )
 
-module.exports = mongoose.model('Client', schema)
+export default mongoose.model('Client', schema)

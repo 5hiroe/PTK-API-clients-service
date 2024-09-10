@@ -8,3 +8,5 @@ router.get('/:clientId', clients.getClient)
 router.post('/', clients.createClient)
 router.put('/:clientId', clients.updateClient)
 router.delete('/:clientId', clients.removeClient)
+
+export default router

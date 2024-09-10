@@ -29,4 +29,4 @@ const schema = new mongoose.Schema(
     { timestamps: true }
 )
 
-module.exports = mongoose.model('Order', schema)
+export default mongoose.model('Order', schema)

@@ -4,7 +4,7 @@ import Joi from 'joi'
 
 export default class CLientValidator extends Validator {
     getClient = Joi.object({
-        clientId: Joi.string().objectId().required()
+        clientId: Joi.string().max(100).required()
     })
 
     createClient = Joi.object({
@@ -14,10 +14,10 @@ export default class CLientValidator extends Validator {
     updateClient = client
 
     updateClientId = Joi.object({
-        clientId: Joi.string().objectId().required()
+        clientId: Joi.string().max(100).required()
     })
 
     removeClient = Joi.object({
-        clientId: Joi.string().objectId().required()
+        clientId: Joi.string().max(100).required()
     })
 }
