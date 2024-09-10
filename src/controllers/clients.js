@@ -38,5 +38,6 @@ export async function removeClient (req, res) {
     const { params } = req
     ClientValidatorInstance.validate(params, ClientValidatorInstance.removeClient)
     const { clientId } = req.params
+    await ClientServiceInstance.remove({ clientId })
     return res.status(200).json({ message: 'Client supprimé.' })
 }
