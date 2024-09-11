@@ -25,6 +25,7 @@ export default class ClientService {
      */
     async get ({ clientId }) {
         const client = await ClientModel.findById(clientId)
+        return client
     }
 
     /**
