@@ -11,7 +11,9 @@ export default class CLientValidator extends Validator {
         fields: client.required()
     })
 
-    updateClient = client
+    updateClient = Joi.object({
+        fields: client.required()
+    })
 
     updateClientId = Joi.object({
         clientId: Joi.string().max(100).required()
