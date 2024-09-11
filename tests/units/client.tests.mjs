@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import Client from '../../src/models/client.js'; // Utilise import pour les modules ES
-import Order from '../../src/models/order.js';
+import Client from '../../src/models/client.js';
 
 describe('Client Model', function() {
   let saveStub;
@@ -10,285 +9,263 @@ describe('Client Model', function() {
   let findByIdStub;
 
   beforeEach(function() {
-    // Remplace les méthodes de Mongoose par des stubs
     saveStub = sinon.stub(Client.prototype, 'save');
     validateStub = sinon.stub(Client.prototype, 'validate');
     findByIdStub = sinon.stub(Client, 'findById');
   });
 
   afterEach(function() {
-    // Restore les méthodes originales après chaque test
     sinon.restore();
   });
 
-  // Test Validation
-  it('should throw validation errors for missing or invalid fields', async function() {
-    const errors = {
-      firstname: 'Field is required',
-      lastname: 'Field is required',
-      email: 'Invalid email format',
-      phone: 'Invalid phone format'
-    };
+  describe('Validation', function() {
+    it('should throw validation errors for missing or invalid fields', async function() {
+      const errors = {
+        firstname: 'Field is required',
+        lastname: 'Field is required',
+        email: 'Invalid email format',
+        phone: 'Invalid phone format'
+      };
 
-    validateStub.throws({ errors });
+      validateStub.throws({ errors });
 
-    const client = new Client({
-      firstname: '',
-      lastname: '',
-      phone: '1234',
-      email: 'invalid-email'
-    });
+      const client = new Client({
+        firstname: '',
+        lastname: '',
+        phone: '1234',
+        email: 'invalid-email'
+      });
 
-    try {
-      await client.validate();
-    } catch (error) {
-      expect(error.errors).to.have.property('firstname');
-      expect(error.errors).to.have.property('lastname');
-      expect(error.errors).to.have.property('email');
-      expect(error.errors).to.have.property('phone');
-    }
-  });
-
-  // Test Création et Sauvegarde
-  it('should save a client successfully', async function() {
-    saveStub.resolves({
-      _id: 'some-id',
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com',
-      address: {
-        street: '123 Elm St',
-        city: 'Somewhere',
-        postalCode: '12345',
-        country: 'Country'
+      try {
+        await client.validate();
+      } catch (error) {
+        expect(error.errors).to.have.property('firstname');
+        expect(error.errors).to.have.property('lastname');
+        expect(error.errors).to.have.property('email');
+        expect(error.errors).to.have.property('phone');
       }
     });
 
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com',
-      address: {
-        street: '123 Elm St',
-        city: 'Somewhere',
-        postalCode: '12345',
-        country: 'Country'
+    it('should validate successfully without optional fields', async function() {
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
+
+      const result = await client.validate();
+      expect(result).to.be.undefined;
+    });
+
+    it('should throw validation error for invalid email format', async function() {
+      validateStub.throws({ errors: { email: 'Invalid email format' } });
+
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'invalid-email'
+      });
+
+      try {
+        await client.validate();
+      } catch (error) {
+        expect(error.errors).to.have.property('email');
+        expect(error.errors.email).to.equal('Invalid email format');
       }
     });
 
-    const savedClient = await client.save();
-    expect(savedClient).to.have.property('_id');
-    expect(savedClient.firstname).to.equal('John');
-  });
+    it('should throw validation error if firstname exceeds max length', async function() {
+      validateStub.throws({ errors: { firstname: 'Max length exceeded' } });
 
-  // Test Find By ID
-  it('should find a client by ID', async function() {
-    findByIdStub.resolves({
-      _id: 'some-id',
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    });
+      const client = new Client({
+        firstname: 'A'.repeat(101),
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
 
-    const foundClient = await Client.findById('some-id');
-    expect(foundClient).to.have.property('_id');
-    expect(foundClient.firstname).to.equal('John');
-  });
-
-  // Test Création sans Champs Optionnels
-  it('should validate successfully without optional fields', async function() {
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    });
-
-    const result = await client.validate();
-    expect(result).to.be.undefined;
-  });
-
-  // Test Email Invalid
-  it('should throw validation error for invalid email format', async function() {
-    validateStub.throws({ errors: { email: 'Invalid email format' } });
-
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'invalid-email'
-    });
-
-    try {
-      await client.validate();
-    } catch (error) {
-      expect(error.errors).to.have.property('email');
-      expect(error.errors.email).to.equal('Invalid email format');
-    }
-  });
-
-  // Test Prénom Trop Long
-  it('should throw validation error if firstname exceeds max length', async function() {
-    validateStub.throws({ errors: { firstname: 'Max length exceeded' } });
-
-    const client = new Client({
-      firstname: 'A'.repeat(101),
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    });
-
-    try {
-      await client.validate();
-    } catch (error) {
-      expect(error.errors).to.have.property('firstname');
-      expect(error.errors.firstname).to.equal('Max length exceeded');
-    }
-  });
-
-  // Test Sauvegarde avec Adresse
-  it('should save a client with an address successfully', async function() {
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com',
-      address: {
-        street: '123 Elm St',
-        city: 'Somewhere',
-        postalCode: '12345',
-        country: 'Country'
+      try {
+        await client.validate();
+      } catch (error) {
+        expect(error.errors).to.have.property('firstname');
+        expect(error.errors.firstname).to.equal('Max length exceeded');
       }
     });
-
-    saveStub.resolves(client);
-
-    const savedClient = await client.save();
-    expect(savedClient).to.have.property('address');
-    expect(savedClient.address).to.have.property('street', '123 Elm St');
   });
 
-  // Test Recherche Par Email
-  it('should find a client by email using a static method', async function() {
-    const mockClient = {
-      _id: 'some-id',
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    };
+  describe('Persistence', function() {
+    it('should save a client successfully', async function() {
+      saveStub.resolves({
+        _id: 'some-id',
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com',
+        address: {
+          street: '123 Elm St',
+          city: 'Somewhere',
+          postalCode: '12345',
+          country: 'Country'
+        }
+      });
 
-    const findByEmailStub = sinon.stub(Client, 'findOne').resolves(mockClient);
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com',
+        address: {
+          street: '123 Elm St',
+          city: 'Somewhere',
+          postalCode: '12345',
+          country: 'Country'
+        }
+      });
 
-    const foundClient = await Client.findOne({ email: 'john.doe@example.com' });
-    expect(foundClient).to.have.property('_id', 'some-id');
-    expect(foundClient.email).to.equal('john.doe@example.com');
+      const savedClient = await client.save();
+      expect(savedClient).to.have.property('_id');
+      expect(savedClient.firstname).to.equal('John');
+    });
 
-    findByEmailStub.restore();
+    it('should save a client with an address successfully', async function() {
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com',
+        address: {
+          street: '123 Elm St',
+          city: 'Somewhere',
+          postalCode: '12345',
+          country: 'Country'
+        }
+      });
+
+      saveStub.resolves(client);
+
+      const savedClient = await client.save();
+      expect(savedClient).to.have.property('address');
+      expect(savedClient.address).to.have.property('street', '123 Elm St');
+    });
+
+    it('should throw error when email is duplicated', async function() {
+      const client1 = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
+
+      const client2 = new Client({
+        firstname: 'Jane',
+        lastname: 'Smith',
+        phone: '0987654321',
+        email: 'john.doe@example.com'
+      });
+
+      saveStub.onFirstCall().resolves(client1);
+      saveStub.onSecondCall().throws({ code: 11000 });
+
+      await client1.save();
+      try {
+        await client2.save();
+      } catch (error) {
+        expect(error).to.have.property('code', 11000);
+      }
+    });
   });
 
-  // Test Suppression
-  it('should delete a client successfully', async function() {
-    const deleteStub = sinon.stub(Client, 'findByIdAndDelete').resolves({ acknowledged: true, deletedCount: 1 });
+  describe('Find and Delete', function() {
+    it('should find a client by ID', async function() {
+      findByIdStub.resolves({
+        _id: 'some-id',
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
 
-    const clientId = 'some-id';
+      const foundClient = await Client.findById('some-id');
+      expect(foundClient).to.have.property('_id');
+      expect(foundClient.firstname).to.equal('John');
+    });
 
-    const result = await Client.findByIdAndDelete(clientId);
-    expect(result).to.have.property('acknowledged', true);
-    expect(result).to.have.property('deletedCount', 1);
+    it('should delete a client successfully', async function() {
+      const deleteStub = sinon.stub(Client, 'findByIdAndDelete').resolves({ acknowledged: true, deletedCount: 1 });
 
-    deleteStub.restore();
+      const clientId = 'some-id';
+
+      const result = await Client.findByIdAndDelete(clientId);
+      expect(result).to.have.property('acknowledged', true);
+      expect(result).to.have.property('deletedCount', 1);
+
+      deleteStub.restore();
+    });
   });
 
-  // Test Timestamps
-  it('should set createdAt and updatedAt timestamps', async function() {
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    });
+  describe('Timestamps', function() {
+    it('should set createdAt and updatedAt timestamps', async function() {
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
 
-    saveStub.resolves({
-      ...client._doc,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
+      saveStub.resolves({
+        ...client._doc,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
 
-    const savedClient = await client.save();
-    expect(savedClient).to.have.property('createdAt');
-    expect(savedClient).to.have.property('updatedAt');
+      const savedClient = await client.save();
+      expect(savedClient).to.have.property('createdAt');
+      expect(savedClient).to.have.property('updatedAt');
+    });
   });
 
-  // Test Email Duplicated
-  it('should throw error when email is duplicated', async function() {
-    const client1 = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
+  describe('Concurrency', function() {
+    it('should handle concurrent updates gracefully', async function() {
+      const client = new Client({
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      });
+
+      saveStub.onFirstCall().resolves(client);
+      saveStub.onSecondCall().rejects(new Error('Concurrent modification error'));
+
+      const firstUpdate = client.save();
+      const secondUpdate = client.save();
+
+      try {
+        await Promise.all([firstUpdate, secondUpdate]);
+      } catch (error) {
+        expect(error.message).to.equal('Concurrent modification error');
+      }
     });
-
-    const client2 = new Client({
-      firstname: 'Jane',
-      lastname: 'Smith',
-      phone: '0987654321',
-      email: 'john.doe@example.com' // Même email que client1
-    });
-
-    saveStub.onFirstCall().resolves(client1);
-    saveStub.onSecondCall().throws({ code: 11000 }); // Erreur d'unicité
-
-    await client1.save();
-    try {
-      await client2.save();
-    } catch (error) {
-      expect(error).to.have.property('code', 11000);
-    }
   });
 
-  // Test Long Prénom
-  it('should throw validation error for excessively long firstname', async function() {
-    const longFirstname = 'J'.repeat(300);
-    validateStub.throws({ errors: { firstname: 'Firstname too long' } });
+  describe('Static Methods', function() {
+    it('should find a client by email using a static method', async function() {
+      const mockClient = {
+        _id: 'some-id',
+        firstname: 'John',
+        lastname: 'Doe',
+        phone: '1234567890',
+        email: 'john.doe@example.com'
+      };
 
-    const client = new Client({
-      firstname: longFirstname,
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
+      const findByEmailStub = sinon.stub(Client, 'findOne').resolves(mockClient);
+
+      const foundClient = await Client.findOne({ email: 'john.doe@example.com' });
+      expect(foundClient).to.have.property('_id', 'some-id');
+      expect(foundClient.email).to.equal('john.doe@example.com');
+
+      findByEmailStub.restore();
     });
-
-    try {
-      await client.validate();
-    } catch (error) {
-      expect(error.errors).to.have.property('firstname');
-    }
-  });
-
-  // Test Concurrence
-  it('should handle concurrent updates gracefully', async function() {
-    const client = new Client({
-      firstname: 'John',
-      lastname: 'Doe',
-      phone: '1234567890',
-      email: 'john.doe@example.com'
-    });
-
-    // Le premier appel à save() réussit, le second échoue
-    saveStub.onFirstCall().resolves(client);
-    saveStub.onSecondCall().rejects(new Error('Concurrent modification error'));
-
-    const firstUpdate = client.save();
-    const secondUpdate = client.save();
-
-    try {
-      await Promise.all([firstUpdate, secondUpdate]);
-    } catch (error) {
-      expect(error.message).to.equal('Concurrent modification error');
-    }
   });
 });

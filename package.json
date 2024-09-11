@@ -5,11 +5,11 @@
   "main": "app.js",
   "scripts": {
     "start": "node -r dotenv/config ./src/app.js",
-    "test": "mocha --require @babel/register ./tests/integration/*.mjs"
+    "test": "mocha --require @babel/register ./tests/**/*.mjs"
   },
   "mocha": {
     "recursive": true,
-    "spec": "./tests/integration/*.mjs"
+    "spec": "./tests/**/*.mjs"
   },
   "keywords": [],
   "author": "",
@@ -27,8 +27,10 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.4",
     "@babel/register": "^7.24.6",
+    "babel-plugin-istanbul": "^7.0.0",
     "chai": "^5.1.1",
     "mocha": "^10.7.3",
+    "nyc": "^17.0.0",
     "sinon": "^18.0.1",
     "supertest": "^7.0.0"
   }
