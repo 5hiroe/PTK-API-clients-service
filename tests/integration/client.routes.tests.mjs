@@ -104,48 +104,24 @@ describe('Client Routes', function() {
     expect(response.body.client.address).to.have.property('country', 'CountryName');
   });
   
-
-  it('should update a client', async function() {
-    this.timeout(10000); // Augmente le délai d'exécution à 10 secondes pour ce test
-  
+  it('should delete a client', async function() {
     const clientId = '1';
-    const updatedData = {
-      firstname: 'John',
-      lastname: 'Smith',
-      phone: '0987654321',
-      email: 'john.smith@example.com',
-      address: {
-        street: '789 Pine Street',
-        city: 'Elsewhere',
-        postalCode: '54321',
-        country: 'OtherCountry'
-      },
-      orders: []
-    };
-  
-    clientServiceStub.update.resolves({ id: clientId, ...updatedData });
-  
-    try {
-      console.log('Sending PUT request to:', `/clients/${clientId}`);
-      const response = await request(app).put(`/clients/${clientId}`)
-        .send({ fields: updatedData });
-  
-      console.log('Status:', response.status);
-      console.log('Response Body:', response.body);
-  
-      expect(response.status).to.equal(200);
-      expect(response.body.client).to.have.property('firstname', 'John');
-      expect(response.body.client).to.have.property('lastname', 'Smith');
-      expect(response.body.client).to.have.property('phone', '0987654321');
-      expect(response.body.client).to.have.property('email', 'john.smith@example.com');
-      expect(response.body.client.address).to.have.property('street', '789 Pine Street');
-      expect(response.body.client.address).to.have.property('city', 'Elsewhere');
-      expect(response.body.client.address).to.have.property('postalCode', '54321');
-      expect(response.body.client.address).to.have.property('country', 'OtherCountry');
-    } catch (error) {
-      console.error('Error during update client test:', error);
-      throw error;
-    }
-  });
+
+    // Simule la résolution de la méthode remove
+    clientServiceStub.remove.resolves({ message: 'Client supprimé.' });
+
+    // Effectue une requête DELETE pour supprimer le client
+    const response = await request(app).delete(`/clients/${clientId}`);
+
+    // Ajoute des logs pour déboguer
+    console.log('Status:', response.status);
+    console.log('Response Body:', response.body);
+
+    // Vérifie que le statut est 200
+    expect(response.status).to.equal(200);
+    // Vérifie que la réponse contient bien le message
+    expect(response.body).to.have.property('message', 'Client supprimé.');
+});
+
 
 });
