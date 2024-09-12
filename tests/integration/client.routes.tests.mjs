@@ -30,7 +30,20 @@ describe('Client Routes', function() {
   });
 
   it('should get all clients', async function() {
-    clientServiceStub.getAll.resolves([{ id: '1', firstname: 'John', lastname: 'Doe', phone: '1234567890', email: 'john.doe@example.com', address: { street: '456 Oak Street', city: 'Anywhere', postalCode: '67890', country: 'CountryName' }, orders: [] }]);
+    clientServiceStub.getAll.resolves([{
+      id: '1',
+      firstname: 'John',
+      lastname: 'Doe',
+      phone: '1234567890',
+      email: 'john.doe@example.com',
+      address: {
+        street: '456 Oak Street',
+        city: 'Anywhere',
+        postalCode: '67890',
+        country: 'CountryName'
+      },
+      orders: []
+    }]);
 
     const response = await request(app).get('/clients');
     expect(response.status).to.equal(200);
@@ -48,11 +61,23 @@ describe('Client Routes', function() {
 
   it('should get a client by ID', async function() {
     const clientId = '1';
-    const clientData = { id: clientId, firstname: 'John', lastname: 'Doe', phone: '1234567890', email: 'john.doe@example.com', address: { street: '456 Oak Street', city: 'Anywhere', postalCode: '67890', country: 'CountryName' }, orders: [] };
+    const clientData = {
+      id: clientId,
+      firstname: 'John',
+      lastname: 'Doe',
+      phone: '1234567890',
+      email: 'john.doe@example.com',
+      address: {
+        street: '456 Oak Street',
+        city: 'Anywhere',
+        postalCode: '67890',
+        country: 'CountryName'
+      },
+      orders: []
+    };
     clientServiceStub.get.resolves(clientData);
 
     const response = await request(app).get(`/clients/${clientId}`);
-    console.log('Response:', response.body); // Ajoute des logs pour déboguer
     expect(response.status).to.equal(200);
     expect(response.body.client).to.have.property('firstname', 'John');
     expect(response.body.client).to.have.property('lastname', 'Doe');
@@ -81,18 +106,10 @@ describe('Client Routes', function() {
       }
     };
   
-    // Configure le stub pour renvoyer une réponse simulée
     clientServiceStub.create.resolves({ id: '2', ...newClient.fields });
   
-    // Effectue la requête POST
-    const response = await request(app).post('/clients')
-      .send(newClient);
+    const response = await request(app).post('/clients').send(newClient);
   
-    // Ajoute des logs pour déboguer
-    console.log('Status:', response.status);
-    console.log('Response Body:', response.body);
-  
-    // Assertions
     expect(response.status).to.equal(200);
     expect(response.body.client).to.have.property('firstname', 'Jane');
     expect(response.body.client).to.have.property('lastname', 'Doe');
@@ -107,21 +124,42 @@ describe('Client Routes', function() {
   it('should delete a client', async function() {
     const clientId = '1';
 
-    // Simule la résolution de la méthode remove
     clientServiceStub.remove.resolves({ message: 'Client supprimé.' });
 
-    // Effectue une requête DELETE pour supprimer le client
     const response = await request(app).delete(`/clients/${clientId}`);
 
-    // Ajoute des logs pour déboguer
-    console.log('Status:', response.status);
-    console.log('Response Body:', response.body);
-
-    // Vérifie que le statut est 200
     expect(response.status).to.equal(200);
-    // Vérifie que la réponse contient bien le message
     expect(response.body).to.have.property('message', 'Client supprimé.');
-});
+  });
 
+  it('should update a client', async function() {
+    const clientId = '1';
+    const updatedFields = {
+      firstname: 'Jane',
+      lastname: 'Doe',
+      phone: '0987654321',
+      email: 'jane.doe@newemail.com',
+      address: {
+        street: '789 Pine Street',
+        city: 'New City',
+        postalCode: '54321',
+        country: 'NewCountry'
+      },
+      orders: []
+    };
 
+    clientServiceStub.update.resolves({ id: clientId, ...updatedFields });
+
+    const response = await request(app).put(`/clients/${clientId}`).send({ fields: updatedFields });
+
+    expect(response.status).to.equal(200);
+    expect(response.body.client).to.have.property('firstname', 'Jane');
+    expect(response.body.client).to.have.property('lastname', 'Doe');
+    expect(response.body.client).to.have.property('phone', '0987654321');
+    expect(response.body.client).to.have.property('email', 'jane.doe@newemail.com');
+    expect(response.body.client.address).to.have.property('street', '789 Pine Street');
+    expect(response.body.client.address).to.have.property('city', 'New City');
+    expect(response.body.client.address).to.have.property('postalCode', '54321');
+    expect(response.body.client.address).to.have.property('country', 'NewCountry');
+  });
 });
