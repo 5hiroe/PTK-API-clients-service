@@ -2,10 +2,9 @@ import request from 'supertest';
 import express from 'express';
 import router from '../../src/routes/client.js';
 import sinon from 'sinon';
-import { expect } from 'chai';
+import assert from 'assert';
 import ClientService from '../../src/services/clients.js';
 
-// Création de l'application Express
 const app = express();
 app.use(express.json());
 app.use('/clients', router);
@@ -17,7 +16,7 @@ describe('Client Routes', function() {
 
   beforeEach(() => {
     clientServiceStub = sinon.createStubInstance(ClientService);
-  
+
     sinon.replace(ClientService.prototype, 'getAll', clientServiceStub.getAll);
     sinon.replace(ClientService.prototype, 'get', clientServiceStub.get);
     sinon.replace(ClientService.prototype, 'create', clientServiceStub.create);
@@ -46,17 +45,17 @@ describe('Client Routes', function() {
     }]);
 
     const response = await request(app).get('/clients');
-    expect(response.status).to.equal(200);
-    expect(response.body.clients).to.be.an('array');
-    expect(response.body.clients).to.have.lengthOf(1);
-    expect(response.body.clients[0]).to.have.property('firstname', 'John');
-    expect(response.body.clients[0]).to.have.property('lastname', 'Doe');
-    expect(response.body.clients[0]).to.have.property('phone', '1234567890');
-    expect(response.body.clients[0]).to.have.property('email', 'john.doe@example.com');
-    expect(response.body.clients[0].address).to.have.property('street', '456 Oak Street');
-    expect(response.body.clients[0].address).to.have.property('city', 'Anywhere');
-    expect(response.body.clients[0].address).to.have.property('postalCode', '67890');
-    expect(response.body.clients[0].address).to.have.property('country', 'CountryName');
+    assert.strictEqual(response.status, 200);
+    assert(Array.isArray(response.body.clients));
+    assert.strictEqual(response.body.clients.length, 1);
+    assert.strictEqual(response.body.clients[0].firstname, 'John');
+    assert.strictEqual(response.body.clients[0].lastname, 'Doe');
+    assert.strictEqual(response.body.clients[0].phone, '1234567890');
+    assert.strictEqual(response.body.clients[0].email, 'john.doe@example.com');
+    assert.strictEqual(response.body.clients[0].address.street, '456 Oak Street');
+    assert.strictEqual(response.body.clients[0].address.city, 'Anywhere');
+    assert.strictEqual(response.body.clients[0].address.postalCode, '67890');
+    assert.strictEqual(response.body.clients[0].address.country, 'CountryName');
   });
 
   it('should get a client by ID', async function() {
@@ -78,15 +77,15 @@ describe('Client Routes', function() {
     clientServiceStub.get.resolves(clientData);
 
     const response = await request(app).get(`/clients/${clientId}`);
-    expect(response.status).to.equal(200);
-    expect(response.body.client).to.have.property('firstname', 'John');
-    expect(response.body.client).to.have.property('lastname', 'Doe');
-    expect(response.body.client).to.have.property('phone', '1234567890');
-    expect(response.body.client).to.have.property('email', 'john.doe@example.com');
-    expect(response.body.client.address).to.have.property('street', '456 Oak Street');
-    expect(response.body.client.address).to.have.property('city', 'Anywhere');
-    expect(response.body.client.address).to.have.property('postalCode', '67890');
-    expect(response.body.client.address).to.have.property('country', 'CountryName');
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.body.client.firstname, 'John');
+    assert.strictEqual(response.body.client.lastname, 'Doe');
+    assert.strictEqual(response.body.client.phone, '1234567890');
+    assert.strictEqual(response.body.client.email, 'john.doe@example.com');
+    assert.strictEqual(response.body.client.address.street, '456 Oak Street');
+    assert.strictEqual(response.body.client.address.city, 'Anywhere');
+    assert.strictEqual(response.body.client.address.postalCode, '67890');
+    assert.strictEqual(response.body.client.address.country, 'CountryName');
   });
 
   it('should create a client', async function() {
@@ -110,17 +109,17 @@ describe('Client Routes', function() {
   
     const response = await request(app).post('/clients').send(newClient);
   
-    expect(response.status).to.equal(200);
-    expect(response.body.client).to.have.property('firstname', 'Jane');
-    expect(response.body.client).to.have.property('lastname', 'Doe');
-    expect(response.body.client).to.have.property('phone', '1234567890');
-    expect(response.body.client).to.have.property('email', 'jane.doe@example.com');
-    expect(response.body.client.address).to.have.property('street', '123 Elm Street');
-    expect(response.body.client.address).to.have.property('city', 'Somewhere');
-    expect(response.body.client.address).to.have.property('postalCode', '12345');
-    expect(response.body.client.address).to.have.property('country', 'CountryName');
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.body.client.firstname, 'Jane');
+    assert.strictEqual(response.body.client.lastname, 'Doe');
+    assert.strictEqual(response.body.client.phone, '1234567890');
+    assert.strictEqual(response.body.client.email, 'jane.doe@example.com');
+    assert.strictEqual(response.body.client.address.street, '123 Elm Street');
+    assert.strictEqual(response.body.client.address.city, 'Somewhere');
+    assert.strictEqual(response.body.client.address.postalCode, '12345');
+    assert.strictEqual(response.body.client.address.country, 'CountryName');
   });
-  
+
   it('should delete a client', async function() {
     const clientId = '1';
 
@@ -128,8 +127,8 @@ describe('Client Routes', function() {
 
     const response = await request(app).delete(`/clients/${clientId}`);
 
-    expect(response.status).to.equal(200);
-    expect(response.body).to.have.property('message', 'Client supprimé.');
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.body.message, 'Client supprimé.');
   });
 
   it('should update a client', async function() {
@@ -152,14 +151,14 @@ describe('Client Routes', function() {
 
     const response = await request(app).put(`/clients/${clientId}`).send({ fields: updatedFields });
 
-    expect(response.status).to.equal(200);
-    expect(response.body.client).to.have.property('firstname', 'Jane');
-    expect(response.body.client).to.have.property('lastname', 'Doe');
-    expect(response.body.client).to.have.property('phone', '0987654321');
-    expect(response.body.client).to.have.property('email', 'jane.doe@newemail.com');
-    expect(response.body.client.address).to.have.property('street', '789 Pine Street');
-    expect(response.body.client.address).to.have.property('city', 'New City');
-    expect(response.body.client.address).to.have.property('postalCode', '54321');
-    expect(response.body.client.address).to.have.property('country', 'NewCountry');
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.body.client.firstname, 'Jane');
+    assert.strictEqual(response.body.client.lastname, 'Doe');
+    assert.strictEqual(response.body.client.phone, '0987654321');
+    assert.strictEqual(response.body.client.email, 'jane.doe@newemail.com');
+    assert.strictEqual(response.body.client.address.street, '789 Pine Street');
+    assert.strictEqual(response.body.client.address.city, 'New City');
+    assert.strictEqual(response.body.client.address.postalCode, '54321');
+    assert.strictEqual(response.body.client.address.country, 'NewCountry');
   });
 });
