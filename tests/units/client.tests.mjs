@@ -129,7 +129,7 @@ describe('Client Model', function() {
       assert.strictEqual(savedClient.firstname, 'John');
     });
 
-  /* TODO : Test fonctionne plus avec l'assert à la place de l'expect  
+  // TODO : Test fonctionne plus avec l'assert à la place de l'expect  
   it('should save a client with an address successfully', async function() {
       const client = new Client({
         firstname: 'John',
@@ -147,10 +147,13 @@ describe('Client Model', function() {
       saveStub.resolves(client);
 
       const savedClient = await client.save();
-      assert(savedClient.hasOwnProperty('address'));
+      // Mongoose might return a proxy object instead of a plain object
+      // so we need to convert it to a pure JavaScript object to be able to test it properly
+      const savedClientObject = savedClient.toObject();
+      assert(savedClientObject.hasOwnProperty('address'));
       assert.strictEqual(savedClient.address.street, '123 Elm St');
     });
-*/
+
     it('should throw error when email is duplicated', async function() {
       const client1 = new Client({
         firstname: 'John',
