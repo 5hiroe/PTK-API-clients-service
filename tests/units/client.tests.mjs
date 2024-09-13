@@ -129,7 +129,6 @@ describe('Client Model', function() {
       assert.strictEqual(savedClient.firstname, 'John');
     });
 
-  // TODO : Test fonctionne plus avec l'assert à la place de l'expect  
   it('should save a client with an address successfully', async function() {
       const client = new Client({
         firstname: 'John',

@@ -30,7 +30,6 @@ describe('Client Routes', function() {
 
   it('should get all clients', async function() {
     clientServiceStub.getAll.resolves([{
-      id: '1',
       firstname: 'John',
       lastname: 'Doe',
       phone: '1234567890',
