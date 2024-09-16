@@ -25,6 +25,9 @@ export default class ClientService {
      */
     async get ({ clientId }) {
         const client = await ClientModel.findById(clientId)
+        if (!client) {
+            throw new NotFound('Client introuvable.')
+        }
         return client
     }
 

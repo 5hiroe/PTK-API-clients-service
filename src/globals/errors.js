@@ -7,7 +7,7 @@ export class HttpError extends Error {
 }
 
 export class BadRequest extends HttpError {
-  constructor ({ message = 'Format de requête invalide.', errors = [] }) {
+  constructor ({ message = 'Format de requête invalide.', errors = [] }= {}) {
     super({
       message,
       status: 400
