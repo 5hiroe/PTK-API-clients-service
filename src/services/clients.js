@@ -6,7 +6,6 @@ export default class ClientService {
     constructor () {
         if (ClientService.instance instanceof ClientService) {
             return ClientService.instance;
-            return ClientService.instance;
         }
 
         // Object.freeze(this);
@@ -31,9 +30,7 @@ export default class ClientService {
      */
     async get ({ clientId }) {
         const client = await ClientModel.findById(clientId);
-        const client = await ClientModel.findById(clientId);
         if (!client) {
-            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
         // Envoyer un message à RabbitMQ après récupération du client
@@ -67,9 +64,7 @@ export default class ClientService {
      */
     async update ({ clientId, fields }) {
         const client = await ClientModel.findByIdAndUpdate(clientId, fields, { new: true });
-        const client = await ClientModel.findByIdAndUpdate(clientId, fields, { new: true });
         if (!client) {
-            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
 
@@ -87,9 +82,7 @@ export default class ClientService {
      */
     async remove ({ clientId }) {
         const client = await ClientModel.findByIdAndDelete(clientId);
-        const client = await ClientModel.findByIdAndDelete(clientId);
         if (!client) {
-            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
 
