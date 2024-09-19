@@ -7,7 +7,7 @@ let rabbitmqConnection = null;
 export async function initRabbitMQ() {
     if (!rabbitmqChannel) {
         try {
-            rabbitmqConnection = await amqp.connect(process.env.RABBITMQ_URL);
+            rabbitmqConnection = await amqp.connect(`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`);
             rabbitmqChannel = await rabbitmqConnection.createChannel();
             console.log('Connected to RabbitMQ');
         } catch (error) {
