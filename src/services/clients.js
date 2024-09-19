@@ -1,39 +1,16 @@
 import ClientModel from '../models/client.js';
 import { NotFound } from '../globals/errors.js';
-import amqp from 'amqplib';
+import { sendToQueue } from '../configurations/rabbitmq.js';
 
 export default class ClientService {
     constructor () {
         if (ClientService.instance instanceof ClientService) {
             return ClientService.instance;
+            return ClientService.instance;
         }
-        this.rabbitmqChannel = null; // Stocker le canal RabbitMQ ici
-        this.initRabbitMQ(); // Initialiser RabbitMQ
 
         // Object.freeze(this);
         ClientService.instance = this;
-    }
-
-    // Fonction pour se connecter à RabbitMQ et créer un canal
-    async initRabbitMQ() {
-        try {
-            const connection = await amqp.connect('amqp://localhost'); // Connexion à RabbitMQ
-            this.rabbitmqChannel = await connection.createChannel(); // Création d'un canal
-            console.log('Connected to RabbitMQ');
-        } catch (error) {
-            console.error('Error connecting to RabbitMQ:', error);
-        }
-    }
-
-    // Fonction pour envoyer un message à une file RabbitMQ
-    async sendToQueue(queue, message) {
-        if (!this.rabbitmqChannel) {
-            console.error('RabbitMQ channel is not available');
-            return;
-        }
-        await this.rabbitmqChannel.assertQueue(queue, { durable: true });
-        this.rabbitmqChannel.sendToQueue(queue, Buffer.from(message));
-        console.log(`Message sent to ${queue}: ${message}`);
     }
 
     /**
@@ -43,7 +20,7 @@ export default class ClientService {
         const clients = await ClientModel.find();
         // Envoyer un message à RabbitMQ après récupération de tous les clients
         const message = JSON.stringify({ action: 'getAll', clients });
-        await this.sendToQueue('clientQueue', message);
+        await sendToQueue('clientQueue', message);
         return clients;
     }
 
@@ -54,16 +31,19 @@ export default class ClientService {
      */
     async get ({ clientId }) {
         const client = await ClientModel.findById(clientId);
+        const client = await ClientModel.findById(clientId);
         if (!client) {
+            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
         // Envoyer un message à RabbitMQ après récupération du client
         const message = JSON.stringify({ action: 'get', clientId, client });
-        await this.sendToQueue('clientQueue', message);
+        await sendToQueue('clientQueue', message);
         return client;
     }
 
     /**
+     * Create a customer
      * Create a customer
      * 
      * @param {Object} fields
@@ -74,7 +54,7 @@ export default class ClientService {
         
         // Envoyer un message à RabbitMQ après la création du client
         const message = JSON.stringify({ action: 'create', clientId: client._id, fields });
-        await this.sendToQueue('clientQueue', message);
+        await sendToQueue('clientQueue', message);
 
         return client;
     }
@@ -87,13 +67,15 @@ export default class ClientService {
      */
     async update ({ clientId, fields }) {
         const client = await ClientModel.findByIdAndUpdate(clientId, fields, { new: true });
+        const client = await ClientModel.findByIdAndUpdate(clientId, fields, { new: true });
         if (!client) {
+            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
 
         // Envoyer un message à RabbitMQ après la mise à jour du client
         const message = JSON.stringify({ action: 'update', clientId, fields });
-        await this.sendToQueue('clientQueue', message);
+        await sendToQueue('clientQueue', message);
 
         return client;
     }
@@ -105,12 +87,15 @@ export default class ClientService {
      */
     async remove ({ clientId }) {
         const client = await ClientModel.findByIdAndDelete(clientId);
+        const client = await ClientModel.findByIdAndDelete(clientId);
         if (!client) {
+            throw new NotFound('Client introuvable.');
             throw new NotFound('Client introuvable.');
         }
 
         // Envoyer un message à RabbitMQ après la suppression du client
         const message = JSON.stringify({ action: 'delete', clientId });
-        await this.sendToQueue('clientQueue', message);
+        await sendToQueue('clientQueue', message);
     }
 }
+

@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node -r dotenv/config ./src/app.js",
-    "test": "c8 mocha --recursive 'tests/**/*.mjs'"
+    "test": "c8 mocha --recursive 'tests/**/*.mjs' --exit"
   },
   "c8": {
     "include": [
